@@ -1,6 +1,7 @@
 import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useStore } from '@nanostores/react';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
@@ -8,12 +9,13 @@ import { SettingsButton } from '~/components/ui/SettingsButton';
 import { db, deleteById, getAll, chatId, type ChatHistoryItem, useChatHistory } from '~/lib/persistence';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
+import { isMobile } from '~/utils/mobile';
+import { isMenuOpen, setMenuOpen } from '~/lib/stores/menu';
+import { profileStore } from '~/lib/stores/profile';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
 import { useSearchFilter } from '~/lib/hooks/useSearchFilter';
 import { classNames } from '~/utils/classNames';
-import { useStore } from '@nanostores/react';
-import { profileStore } from '~/lib/stores/profile';
 
 const menuVariants = {
   closed: {
@@ -64,7 +66,7 @@ export const Menu = () => {
   const { duplicateCurrentChat, exportChat } = useChatHistory();
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
+  const menuOpen = useStore(isMenuOpen); // Use Nanostore
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profile = useStore(profileStore);
@@ -108,35 +110,39 @@ export const Menu = () => {
   };
 
   useEffect(() => {
-    if (open) {
+    if (menuOpen) {
       loadEntries();
     }
-  }, [open]);
+  }, [menuOpen, loadEntries]); // Added loadEntries to dependency array
 
   useEffect(() => {
     const enterThreshold = 40;
-    const exitThreshold = 40;
+    const exitThreshold = 40; // Renamed from menuExitThreshold for clarity
 
     function onMouseMove(event: MouseEvent) {
-      if (isSettingsOpen) {
+      if (isSettingsOpen || isMobile()) { // Check isMobile() here
         return;
       }
 
       if (event.pageX < enterThreshold) {
-        setOpen(true);
+        setMenuOpen(true); // Update Nanostore
       }
 
       if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
+        setMenuOpen(false); // Update Nanostore
       }
     }
 
-    window.addEventListener('mousemove', onMouseMove);
+    if (!isMobile()) { // Conditionally add event listener
+      window.addEventListener('mousemove', onMouseMove);
+    }
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
+      if (!isMobile()) {
+        window.removeEventListener('mousemove', onMouseMove);
+      }
     };
-  }, [isSettingsOpen]);
+  }, [isSettingsOpen]); // Removed setMenuOpen from dependencies as it's stable
 
   const handleDeleteClick = (event: React.UIEvent, item: ChatHistoryItem) => {
     event.preventDefault();
@@ -150,7 +156,7 @@ export const Menu = () => {
 
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
-    setOpen(false);
+    setMenuOpen(false); // Close menu when settings open
   };
 
   const handleSettingsClose = () => {
@@ -162,14 +168,15 @@ export const Menu = () => {
       <motion.div
         ref={menuRef}
         initial="closed"
-        animate={open ? 'open' : 'closed'}
+        animate={menuOpen ? 'open' : 'closed'} // Use menuOpen from Nanostore
         variants={menuVariants}
-        style={{ width: '340px' }}
+        // style={{ width: '340px' }} // Replaced by UnoCSS classes
         className={classNames(
+          'w-full sm:w-[300px] md:w-[340px]', // Responsive width
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
           'bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800/50',
           'shadow-sm text-sm',
-          isSettingsOpen ? 'z-40' : 'z-sidebar',
+          isSettingsOpen ? 'z-40' : 'z-sidebar', // z-index logic remains
         )}
       >
         <div className="h-12 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/50">
