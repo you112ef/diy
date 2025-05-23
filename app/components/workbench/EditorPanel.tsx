@@ -97,17 +97,17 @@ export const EditorPanel = memo(
             <Panel className="flex flex-col" defaultSize={80} minSize={20}>
               <PanelHeader className="overflow-x-auto">
                 {activeFileSegments?.length && (
-                  <div className="flex items-center flex-1 text-sm">
+                  <div className="flex items-center flex-1 text-sm min-w-0"> {/* Added min-w-0 for flex truncation */}
                     <FileBreadcrumb pathSegments={activeFileSegments} files={files} onFileSelect={onFileSelect} />
                     {activeFileUnsaved && (
-                      <div className="flex gap-1 ml-auto -mr-1.5">
+                      <div className="flex gap-1 ml-auto -mr-1.5 shrink-0"> {/* Added shrink-0 */}
                         <PanelHeaderButton onClick={onFileSave}>
-                          <div className="i-ph:floppy-disk-duotone" />
-                          Save
+                          <div className="i-ph:floppy-disk-duotone text-base" /> {/* Adjusted icon size */}
+                          <span className="hidden sm:inline ml-1">Save</span> {/* Hide text on smallest (mobile), show on sm+ */}
                         </PanelHeaderButton>
                         <PanelHeaderButton onClick={onFileReset}>
-                          <div className="i-ph:clock-counter-clockwise-duotone" />
-                          Reset
+                          <div className="i-ph:clock-counter-clockwise-duotone text-base" /> {/* Adjusted icon size */}
+                          <span className="hidden sm:inline ml-1">Reset</span> {/* Hide text on smallest (mobile), show on sm+ */}
                         </PanelHeaderButton>
                       </div>
                     )}

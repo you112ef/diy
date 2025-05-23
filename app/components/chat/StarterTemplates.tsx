@@ -30,10 +30,10 @@ const StarterTemplates: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <span className="text-sm text-gray-500">or start a blank app with your favorite stack</span>
-      <div className="flex justify-center">
-        <div className="flex w-70 flex-wrap items-center justify-center gap-4">
+    <div className="flex flex-col items-center gap-4 px-2"> {/* Added horizontal padding for very small screens */}
+      <span className="text-sm text-gray-500 text-center">or start a blank app with your favorite stack</span> {/* Added text-center */}
+      <div className="flex justify-center w-full"> {/* Ensure outer div takes full width for centering child */}
+        <div className="flex w-full max-w-md sm:max-w-lg flex-wrap items-center justify-center gap-4 sm:gap-6"> {/* Responsive max-width and gap, w-full for flex container */}
           {STARTER_TEMPLATES.map((template) => (
             <FrameworkLink key={template.name} template={template} />
           ))}

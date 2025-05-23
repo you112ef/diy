@@ -432,11 +432,12 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
           >
             <motion.div
               className={classNames(
-                'w-[1200px] h-[90vh]',
+                'w-full sm:w-11/12 md:w-3/4 lg:w-2/3 xl:max-w-[1000px] 2xl:max-w-[1200px] max-w-full',
+                'h-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto',
                 'bg-[#FAFAFA] dark:bg-[#0A0A0A]',
                 'rounded-2xl shadow-2xl',
                 'border border-[#E5E5E5] dark:border-[#1A1A1A]',
-                'flex flex-col overflow-hidden',
+                'flex flex-col', // Removed overflow-hidden as it's now on the element itself
                 'relative',
               )}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -449,8 +450,8 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
               </div>
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-2 sm:space-x-4">
                     {(activeTab || showTabManagement) && (
                       <button
                         onClick={handleBack}
@@ -459,14 +460,14 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                         <div className="i-ph:arrow-left w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-purple-500 transition-colors" />
                       </button>
                     )}
-                    <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                    <DialogTitle className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate pr-2">
                       {showTabManagement ? 'Tab Management' : activeTab ? TAB_LABELS[activeTab] : 'Control Panel'}
                     </DialogTitle>
                   </div>
 
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     {/* Mode Toggle */}
-                    <div className="flex items-center gap-2 min-w-[140px] border-r border-gray-200 dark:border-gray-800 pr-6">
+                    <div className="hidden sm:flex items-center gap-2 border-r border-gray-200 dark:border-gray-800 pr-2 sm:pr-4">
                       <AnimatedSwitch
                         id="developer-mode"
                         checked={developerMode}
@@ -476,7 +477,8 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     </div>
 
                     {/* Avatar and Dropdown */}
-                    <div className="border-l border-gray-200 dark:border-gray-800 pl-6">
+                    {/* Ensure this doesn't get squeezed out on very small screens if Mode Toggle is visible */}
+                    <div className="pl-2 sm:pl-4 border-l border-gray-200 dark:border-gray-800">
                       <AvatarDropdown onSelectTab={handleTabClick} />
                     </div>
 
@@ -493,10 +495,10 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                 {/* Content */}
                 <div
                   className={classNames(
-                    'flex-1',
-                    'overflow-y-auto',
-                    'hover:overflow-y-auto',
-                    'scrollbar scrollbar-w-2',
+                    'flex-1', // This will now stretch and content will scroll via parent
+                    // 'overflow-y-auto', // Removed as parent handles scrolling
+                    'hover:overflow-y-auto', // Keep for safety, though less likely to be used
+                    'scrollbar scrollbar-w-2', // These apply if it somehow still overflows and hover:overflow-y-auto kicks in
                     'scrollbar-track-transparent',
                     'scrollbar-thumb-[#E5E5E5] hover:scrollbar-thumb-[#CCCCCC]',
                     'dark:scrollbar-thumb-[#333333] dark:hover:scrollbar-thumb-[#444444]',
@@ -510,7 +512,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="p-6"
+                    className="p-4 sm:p-6" // Responsive padding for content area
                   >
                     {showTabManagement ? (
                       <TabManagement />
@@ -518,14 +520,15 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                       getTabComponent(activeTab)
                     ) : (
                       <motion.div
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative"
+                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 relative" // Adjusted grid for better fit
                         variants={gridLayoutVariants}
                         initial="hidden"
                         animate="visible"
                       >
                         <AnimatePresence mode="popLayout">
                           {(visibleTabs as TabWithDevType[]).map((tab: TabWithDevType) => (
-                            <motion.div key={tab.id} layout variants={itemVariants} className="aspect-[1.5/1]">
+                            // Ensure TabTile content is responsive. The aspect ratio might need adjustment.
+                            <motion.div key={tab.id} layout variants={itemVariants} className="aspect-[1.5/1] sm:aspect-[1.4/1] md:aspect-[1.3/1]">
                               <TabTile
                                 tab={tab}
                                 onClick={() => handleTabClick(tab.id as TabType)}
@@ -534,7 +537,7 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                                 statusMessage={getStatusMessage(tab.id)}
                                 description={TAB_DESCRIPTIONS[tab.id]}
                                 isLoading={loadingTab === tab.id}
-                                className="h-full relative"
+                                className="h-full relative" // Ensure TabTile itself uses h-full
                               >
                                 {BETA_TABS.has(tab.id) && <BetaLabel />}
                               </TabTile>

@@ -383,12 +383,12 @@ export const Workbench = memo(
                           workbenchStore.downloadZip();
                         }}
                       >
-                        <div className="i-ph:code" />
-                        Download Code
+                        <div className="i-ph:code text-base sm:text-lg" /> {/* Adjusted icon size */}
+                        <span className="hidden sm:inline ml-1">Download Code</span> {/* Hide text on xs */}
                       </PanelHeaderButton>
                       <PanelHeaderButton className="mr-1 text-sm" onClick={handleSyncFiles} disabled={isSyncing}>
-                        {isSyncing ? <div className="i-ph:spinner" /> : <div className="i-ph:cloud-arrow-down" />}
-                        {isSyncing ? 'Syncing...' : 'Sync Files'}
+                        {isSyncing ? <div className="i-ph:spinner text-base sm:text-lg" /> : <div className="i-ph:cloud-arrow-down text-base sm:text-lg" />} {/* Adjusted icon size */}
+                        <span className="hidden sm:inline ml-1">{isSyncing ? 'Syncing...' : 'Sync Files'}</span> {/* Hide text on xs */}
                       </PanelHeaderButton>
                       <PanelHeaderButton
                         className="mr-1 text-sm"
@@ -396,12 +396,12 @@ export const Workbench = memo(
                           workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
                         }}
                       >
-                        <div className="i-ph:terminal" />
-                        Toggle Terminal
+                        <div className="i-ph:terminal text-base sm:text-lg" /> {/* Adjusted icon size */}
+                        <span className="hidden sm:inline ml-1">Toggle Terminal</span> {/* Hide text on xs */}
                       </PanelHeaderButton>
                       <PanelHeaderButton className="mr-1 text-sm" onClick={() => setIsPushDialogOpen(true)}>
-                        <div className="i-ph:git-branch" />
-                        Push to GitHub
+                        <div className="i-ph:git-branch text-base sm:text-lg" /> {/* Adjusted icon size */}
+                        <span className="hidden sm:inline ml-1">Push to GitHub</span> {/* Hide text on xs */}
                       </PanelHeaderButton>
                     </div>
                   )}
