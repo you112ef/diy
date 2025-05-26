@@ -70,6 +70,9 @@ export const Menu = () => {
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profile = useStore(profileStore);
+  const startNewChatButtonRef = useRef<HTMLAnchorElement>(null); // Ref for the "Start new chat" button
+  const settingsButtonRef = useRef<HTMLButtonElement>(null); // Ref for the Settings button
+  const searchInputRef = useRef<HTMLInputElement>(null); // Ref for the search input
 
   const { filteredItems: filteredList, handleSearchChange } = useSearchFilter({
     items: list,
@@ -112,8 +115,58 @@ export const Menu = () => {
   useEffect(() => {
     if (menuOpen) {
       loadEntries();
+      // Focus the "Start new chat" button when menu opens
+      // Check if isMobile() if this behavior is mobile-only, for now, it's general
+      startNewChatButtonRef.current?.focus();
     }
   }, [menuOpen, loadEntries]); // Added loadEntries to dependency array
+
+  // Effect for Escape key to close menu and Focus Trapping
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && menuOpen) {
+        setMenuOpen(false);
+        return; // Menu closed, no further tabbing logic needed for this event
+      }
+
+      if (event.key === 'Tab' && menuOpen) {
+        const focusableElements = Array.from(
+          menuRef.current?.querySelectorAll(
+            'a[href], button, input, textarea, select, details, [tabindex]:not([tabindex="-1"])',
+          ) || [],
+        ).filter(
+          (el) => el instanceof HTMLElement && el.offsetParent !== null && !el.hasAttribute('disabled'),
+        ) as HTMLElement[];
+
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            event.preventDefault();
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            event.preventDefault();
+          }
+        }
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [menuOpen]); // Dependency on menuOpen ensures listener is added/removed appropriately
 
   useEffect(() => {
     const enterThreshold = 40;
@@ -202,10 +255,11 @@ export const Menu = () => {
         </div>
         <CurrentDateTime />
         <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-          <div className="p-4 space-y-3">
+          <div className="p-3 sm:p-4 space-y-3"> {/* Adjusted padding */}
             <a
+              ref={startNewChatButtonRef} // Assign ref
               href="/"
-              className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-4 py-2 transition-colors"
+              className="flex gap-2 items-center bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-500/20 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 transition-colors" // Adjusted padding
             >
               <span className="inline-block i-lucide:message-square h-4 w-4" />
               <span className="text-sm font-medium">Start new chat</span>
@@ -215,6 +269,8 @@ export const Menu = () => {
                 <span className="i-lucide:search h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
               <input
+                // Consider adding a ref here if it's the preferred first focus element
+                ref={searchInputRef} // Assign ref to search input
                 className="w-full bg-gray-50 dark:bg-gray-900 relative pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500/50 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 border border-gray-200 dark:border-gray-800"
                 type="search"
                 placeholder="Search chats..."
@@ -284,7 +340,13 @@ export const Menu = () => {
             </DialogRoot>
           </div>
           <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 px-4 py-3">
-            <SettingsButton onClick={handleSettingsClick} />
+            {/* Assign ref to SettingsButton by wrapping it or passing ref if it's a forwardRef component */}
+            {/* Assuming SettingsButton is a simple button or can take a ref directly */}
+            {/* If SettingsButton is a component that doesn't forward refs, this might need adjustment */}
+            {/* For now, let's assume we can wrap it or it forwards refs. If not, ThemeSwitch would be the last. */}
+            <div ref={settingsButtonRef} tabIndex={-1}> {/* Wrapper for ref if SettingsButton doesn't take it directly */}
+                 <SettingsButton onClick={handleSettingsClick} />
+            </div>
             <ThemeSwitch />
           </div>
         </div>

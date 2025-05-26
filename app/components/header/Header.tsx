@@ -45,13 +45,14 @@ export function Header() {
 
       {chat.started && ( // Display ChatDescription and HeaderActionButtons only when the chat has started.
         <>
-          <span className="flex-1 px-2 sm:px-4 truncate text-center text-bolt-elements-textPrimary">
+          <span className="flex-1 px-2 sm:px-4 truncate text-center text-bolt-elements-textPrimary text-sm sm:text-base">
             <ClientOnly>{() => <ChatDescription />}</ClientOnly>
           </span>
           <ClientOnly>
             {() => (
               // Ensure HeaderActionButtons are also responsive or managed correctly on mobile
-              <div className="mr-1">
+              // Added flex and flex-wrap to allow buttons within HeaderActionButtons to wrap if needed
+              <div className="mr-1 flex flex-wrap gap-1 justify-end">
                 <HeaderActionButtons />
               </div>
             )}

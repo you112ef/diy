@@ -1,5 +1,5 @@
 .Toastify__toast {
-  --at-apply: shadow-md;
+  --at-apply: shadow-md rounded-md; /* Added rounded-md */
 
   background-color: var(--bolt-elements-bg-depth-2);
   color: var(--bolt-elements-textPrimary);

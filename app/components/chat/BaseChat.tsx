@@ -319,8 +319,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div ref={scrollRef} className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
-          <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
+        <div ref={scrollRef} className="flex flex-col xl:flex-row overflow-y-auto w-full h-full">
+          <div className={classNames(styles.Chat, 'flex flex-col flex-grow xl:min-w-[var(--chat-min-width)] max-xl:min-w-0 max-xl:w-full h-full')}>
             {!chatStarted && (
               <div id="intro" className="mt-[10vh] sm:mt-[16vh] max-w-chat mx-auto text-center px-4"> {/* Removed lg:px-0 to maintain padding on larger screens too */}
                 <h1 className="text-2xl sm:text-3xl lg:text-5xl xl:text-6xl font-bold text-bolt-elements-textPrimary mb-3 sm:mb-4 animate-fade-in"> {/* Adjusted font sizes */}
@@ -556,7 +556,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       )}
                     </ClientOnly>
                     <div className="flex justify-between items-center text-sm p-2 sm:p-4 sm:pt-2"> {/* Responsive padding */}
-                      <div className="flex gap-0.5 sm:gap-1 items-center"> {/* Responsive gap */}
+                    <div className="flex gap-0.5 sm:gap-1 items-center flex-wrap"> {/* Responsive gap and allow wrapping */}
                         <IconButton title="Upload file" className="transition-all p-1.5 sm:p-2" onClick={() => handleFileUpload()}> {/* Responsive padding for tappability */}
                           <div className="i-ph:paperclip text-lg sm:text-xl"></div> {/* Responsive icon size */}
                         </IconButton>
@@ -613,7 +613,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             </div>
             <div className="flex flex-col justify-center gap-3 sm:gap-5 px-2"> {/* Responsive gap and padding */}
               {!chatStarted && (
-                <div className="flex flex-col sm:flex-row justify-center gap-2"> {/* Stack buttons on mobile */}
+                <div className="flex flex-col sm:flex-row justify-center gap-2 flex-wrap"> {/* Stack buttons on mobile and allow wrapping */}
                   {ImportButtons(importChat)} {/* This component might need internal responsive adjustments */}
                   <GitCloneButton importChat={importChat} /> {/* This component might need internal responsive adjustments */}
                 </div>

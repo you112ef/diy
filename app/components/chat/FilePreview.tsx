@@ -17,10 +17,10 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, imageDataList, onRemov
         <div key={file.name + file.size} className="mr-2 relative">
           {imageDataList[index] && (
             <div className="relative pt-4 pr-4">
-              <img src={imageDataList[index]} alt={file.name} className="max-h-20" />
+              <img src={imageDataList[index]} alt={file.name} className="max-h-20 rounded-md" /> {/* Added rounded-md */}
               <button
                 onClick={() => onRemove(index)}
-                className="absolute top-1 right-1 z-10 bg-black rounded-full w-5 h-5 shadow-md hover:bg-gray-900 transition-colors flex items-center justify-center"
+                className="absolute top-1 right-1 z-10 bg-black rounded-full w-5 h-5 shadow-sm hover:bg-gray-900 transition-colors flex items-center justify-center" // Changed shadow-md to shadow-sm
               >
                 <div className="i-ph:x w-3 h-3 text-gray-200" />
               </button>

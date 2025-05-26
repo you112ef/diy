@@ -18,7 +18,8 @@ const ThoughtBox = ({ title, children }: PropsWithChildren<{ title: string }>) =
         border border-bolt-elements-borderColor
       `}
     >
-      <div className="p-4 flex items-center gap-4 rounded-lg  text-bolt-elements-textSecondary font-medium leading-5 text-sm  border border-bolt-elements-borderColor">
+      {/* Removed rounded-lg and border from this inner header div */}
+      <div className="p-4 flex items-center gap-4 text-bolt-elements-textSecondary font-medium leading-5 text-sm">
         <div className="i-ph:brain-thin text-2xl" />
         <div className="div">
           <span> {title}</span>{' '}
@@ -29,9 +30,9 @@ const ThoughtBox = ({ title, children }: PropsWithChildren<{ title: string }>) =
         className={`
         transition-opacity 
         duration-300
-        p-4 
-        rounded-lg 
+        p-4
         ${isExpanded ? 'opacity-100' : 'opacity-0'}
+        ${isExpanded ? '' : 'hidden'} {/* Effectively display:none when not expanded */}
       `}
       >
         {children}

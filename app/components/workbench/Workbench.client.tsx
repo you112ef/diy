@@ -52,22 +52,7 @@ const sliderOptions: SliderOptions<WorkbenchViewType> = {
   },
 };
 
-const workbenchVariants = {
-  closed: {
-    width: 0,
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-  open: {
-    width: 'var(--workbench-width)',
-    transition: {
-      duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-} satisfies Variants;
+// const workbenchVariants = { ... } // This will be removed and replaced by dynamicWorkbenchVariants
 
 const FileModifiedDropdown = memo(
   ({
@@ -107,7 +92,7 @@ const FileModifiedDropdown = memo(
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0"
               >
-                <Popover.Panel className="absolute right-0 z-20 mt-2 w-80 origin-top-right rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
+                <Popover.Panel className="absolute right-0 z-20 mt-2 w-[calc(100vw-4rem)] sm:w-80 mx-auto origin-top-right rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
                   <div className="p-2">
                     <div className="relative mx-2 mb-2">
                       <input
@@ -295,6 +280,47 @@ export const Workbench = memo(
 
     const isSmallViewport = useViewport(1024);
 
+    const dynamicWorkbenchVariants = useMemo((): Variants => {
+      if (isSmallViewport) {
+        return {
+          closed: {
+            x: '100%', // Slide completely off-screen to the right
+            width: '100%', // Keep width 100% so it slides as a full panel
+            transition: {
+              x: { duration: 0.2, ease: cubicEasingFn },
+              width: { duration: 0.2, ease: cubicEasingFn, delay: 0.05 }, // Delay width transition slightly if needed
+            },
+          },
+          open: {
+            x: '0%', // Slide in to fill the screen
+            width: '100%',
+            transition: {
+              x: { duration: 0.2, ease: cubicEasingFn },
+              width: { duration: 0.2, ease: cubicEasingFn },
+            },
+          },
+        };
+      } else {
+        // Desktop variants (original logic)
+        return {
+          closed: {
+            width: 0,
+            // x: 0, // No x translation needed for desktop
+            transition: {
+              width: { duration: 0.2, ease: cubicEasingFn },
+            },
+          },
+          open: {
+            width: 'var(--workbench-width)',
+            // x: 0, // No x translation needed for desktop
+            transition: {
+              width: { duration: 0.2, ease: cubicEasingFn },
+            },
+          },
+        };
+      }
+    }, [isSmallViewport]);
+
     const setSelectedView = (view: WorkbenchViewType) => {
       workbenchStore.currentView.set(view);
     };
@@ -357,22 +383,50 @@ export const Workbench = memo(
           initial="closed"
           animate={showWorkbench ? 'open' : 'closed'}
           variants={workbenchVariants}
-          className="z-workbench"
+          className={classNames('z-workbench', {
+            'fixed inset-0': isSmallViewport && showWorkbench, // Cover screen only when open on mobile
+            'fixed top-0 right-0 bottom-0': isSmallViewport && !showWorkbench, // Keep it ready to slide in
+            'relative': !isSmallViewport,
+          })}
+          style={
+            isSmallViewport 
+            ? { width: '100%'} // On mobile, width is always 100% for the motion div
+            : { width: showWorkbench ? 'var(--workbench-width)' : '0px' } // Desktop width animation
+          }
         >
           <div
             className={classNames(
-              'fixed top-[calc(var(--header-height)+1.5rem)] bottom-6 w-[var(--workbench-inner-width)] mr-4 z-0 transition-[left,width] duration-200 bolt-ease-cubic-bezier',
+              'h-full z-0', // Base: h-full, z-0
               {
+                // Mobile specific:
                 'w-full': isSmallViewport,
-                'left-0': showWorkbench && isSmallViewport,
-                'left-[var(--workbench-left)]': showWorkbench,
-                'left-[100%]': !showWorkbench,
-              },
+                // Desktop specific:
+                'fixed top-[calc(var(--header-height)+1.5rem)] bottom-6 w-[var(--workbench-inner-width)] mr-4 transition-[left,width] duration-200 bolt-ease-cubic-bezier': !isSmallViewport,
+              }
             )}
+            style={!isSmallViewport ? { // Desktop left positioning
+              left: showWorkbench ? 'var(--workbench-left)' : '100%',
+            } : { left: '0%' }} // Mobile: always at left:0 within its parent motion.div
           >
-            <div className="absolute inset-0 px-2 lg:px-6">
-              <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
-                <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
+            <div className={classNames(
+              "absolute inset-0",
+              { 'px-2 sm:px-4': isSmallViewport }, // Padding for mobile
+              { 'px-2 lg:px-6': !isSmallViewport }  // Padding for desktop
+            )}>
+              <div className={classNames(
+                "h-full flex flex-col bg-bolt-elements-background-depth-2 shadow-sm rounded-lg overflow-hidden",
+                {
+                  'border-transparent': isSmallViewport && showWorkbench, // No border when full screen overlay
+                  'border border-bolt-elements-borderColor': !isSmallViewport || (isSmallViewport && !showWorkbench), // Border for desktop or when closed on mobile
+                }
+              )}>
+                <div className={classNames(
+                  "flex items-center px-3 py-2 border-b",
+                  {
+                    'border-transparent': isSmallViewport && showWorkbench, // No top border when full screen overlay
+                    'border-bolt-elements-borderColor': !isSmallViewport || (isSmallViewport && !showWorkbench),
+                  }
+                )}>
                   <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
                   <div className="ml-auto" />
                   {selectedView === 'code' && (
